@@ -1,0 +1,39 @@
+{
+  "name": "devtools",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "prepare": "npx husky install",
+    "lint": "eslint --cache --fix  --ext .js,.ts,.jsx,.tsx ."
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config-react": "0.43.1",
+    "@commitlint/cli": "^17.3.0",
+    "@commitlint/config-conventional": "^17.3.0",
+    "@types/react": "^18.2.18",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.4",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-import": "2.29.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.1",
+    "less": "^4.2.0",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.8.1",
+    "typescript": "5.3.2",
+    "vite": "^4.4.8",
+    "vite-plugin-monkey": "^3.4.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": "eslint --cache --fix --ext .js,.ts,.jsx,.tsx .",
+    "*.{js,jsx,tsx,ts,less,md,json}": "prettier --ignore-unknown --write"
+  }
+}
