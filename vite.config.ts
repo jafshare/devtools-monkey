@@ -9,9 +9,10 @@ export default defineConfig({
     monkey({
       entry: "src/main.tsx",
       userscript: {
+        author: "Hunter Jiang",
         icon: "https://vitejs.dev/logo.svg",
         namespace: "npm/vite-plugin-monkey",
-        match: ["https://www.google.com/"]
+        match: ["*://*/*"]
       },
       build: {
         externalGlobals: {

@@ -1,0 +1,29 @@
+name: release
+
+on:
+  release:
+    types: [created] # 表示在创建新的 Release 时触发
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.12
+          registry-url: https://registry.npmjs.org/
+      - name: 安装pnpm
+        run: npm i -g pnpm@7.18.2
+      - name: 安装依赖
+        run: pnpm i
+      - name: 打包
+        run: pnpm run build
+      - name: 打包zip
+        run: cd dist && zip -r dist.zip * && mv dist.zip ..
+      - name: 发布Release
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: dist.zip application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
