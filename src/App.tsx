@@ -7,6 +7,7 @@ import CountDown from "./components/CountDown";
 function App() {
   const [visible, setVisible] = useState(false);
   const [countDownVisible, setCountDownVisible] = useState(false);
+
   const handleCommand = (cmd: string, ...args: any[]) => {
     setVisible(false);
     switch (cmd) {
@@ -40,6 +41,7 @@ function App() {
       </div>
       {visible && (
         <ToolsModal
+          onClose={() => setVisible(false)}
           className={styles.devtoolsModal}
           onCommand={handleCommand}
         />

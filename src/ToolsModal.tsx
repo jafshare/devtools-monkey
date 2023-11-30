@@ -1,23 +1,22 @@
+import React, { useRef } from "react";
+
 import styles from "./ToolsModal.module.less";
+import { useClickOutside } from "./hooks";
 
 export interface ToolsModalProps {
+  onClose?: () => void;
   onCommand: (cmd: string) => void;
   className?: string;
 }
-function ToolsModal({ onCommand, ...rest }: ToolsModalProps) {
+function ToolsModal({ onCommand, onClose, ...rest }: ToolsModalProps) {
+  const modalRef = useRef<HTMLElement>();
   const startDebug = () => {
     onCommand?.("showCountDown");
-    setTimeout(() => {
-      onCommand?.("hiddenCountDown");
-      setTimeout(() => {
-        /* eslint-disable */
-        debugger;
-      });
-    }, 5 * 1000);
   };
+  useClickOutside(modalRef, onClose);
   return (
     <>
-      <div {...rest}>
+      <div {...rest} ref={modalRef as any}>
         <button
           className={styles.itemBtn}
           onClick={startDebug}

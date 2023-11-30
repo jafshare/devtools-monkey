@@ -6,7 +6,10 @@ export interface CountDownProps {
   initial: number;
   onDestroy?: () => void;
 }
-function CountDown({ initial = 5, onDestroy }: CountDownProps) {
+function CountDown({
+  initial = 5,
+  onDestroy
+}: React.PropsWithChildren<CountDownProps>) {
   const [count, setCount] = useState(initial);
   const timer = useRef<any>();
   useEffect(() => {
@@ -15,6 +18,11 @@ function CountDown({ initial = 5, onDestroy }: CountDownProps) {
         const newVal = val - 1;
         if (newVal <= 0) {
           timer.current && clearInterval(timer.current);
+          // 不阻塞主线程
+          setTimeout(() => {
+            /* eslint-disable */
+            debugger;
+          });
           onDestroy?.();
         }
         return newVal;
