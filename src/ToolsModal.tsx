@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 
 import styles from "./ToolsModal.module.less";
 import { useClickOutside } from "./hooks";
@@ -7,13 +7,14 @@ export interface ToolsModalProps {
   onClose?: () => void;
   onCommand: (cmd: string) => void;
   className?: string;
+  ignores: any[];
 }
-function ToolsModal({ onCommand, onClose, ...rest }: ToolsModalProps) {
+function ToolsModal({ onCommand, onClose, ignores, ...rest }: ToolsModalProps) {
   const modalRef = useRef<HTMLElement>();
   const startDebug = () => {
     onCommand?.("showCountDown");
   };
-  useClickOutside(modalRef, onClose);
+  useClickOutside(modalRef, onClose, { ignores });
   return (
     <>
       <div {...rest} ref={modalRef as any}>

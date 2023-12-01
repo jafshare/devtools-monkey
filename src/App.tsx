@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import styles from "./App.module.less";
 import ToolsModal from "./ToolsModal";
@@ -7,7 +7,7 @@ import CountDown from "./components/CountDown";
 function App() {
   const [visible, setVisible] = useState(false);
   const [countDownVisible, setCountDownVisible] = useState(false);
-
+  const floatingRef = useRef<HTMLElement>();
   const handleCommand = (cmd: string, ...args: any[]) => {
     setVisible(false);
     switch (cmd) {
@@ -24,7 +24,8 @@ function App() {
   return (
     <>
       <div
-        className={styles.devtoolsBtn}
+        className={styles.floatingBtn}
+        ref={floatingRef as any}
         onClick={() => setVisible((val) => !val)}
       >
         <svg
@@ -44,6 +45,7 @@ function App() {
           onClose={() => setVisible(false)}
           className={styles.devtoolsModal}
           onCommand={handleCommand}
+          ignores={[floatingRef.current]}
         />
       )}
       {countDownVisible && (
