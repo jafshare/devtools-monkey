@@ -1,13 +1,32 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./App.module.less";
+import SettingModal from "./SettingModal";
 import ToolsModal from "./ToolsModal";
 import CountDown from "./components/CountDown";
+import { useKeybinding } from "./hooks";
+
+import type { HotkeysEvent } from "hotkeys-js";
+
+import { GM_getValue } from "$";
 
 function App() {
   const [visible, setVisible] = useState(false);
   const [countDownVisible, setCountDownVisible] = useState(false);
+  const [settingVisible, setSettingVisible] = useState(false);
+  const keybindings = useRef<Record<string, string>>({});
+  const [keybindingStr, setKeybindingStr] = useState("");
+  const [countDownInitial, setCountDownInitial] = useState(5);
   const floatingRef = useRef<HTMLElement>();
+  const initData = () => {
+    const settings = GM_getValue("devtools.settings") || {};
+    const debugHotKey = (settings as any)?.debugHotkey || "";
+    setCountDownInitial((settings as any)?.defaultCountDown ?? 5);
+    keybindings.current = {
+      [debugHotKey]: "showCountDown"
+    };
+    setKeybindingStr(debugHotKey);
+  };
   const handleCommand = (cmd: string, ...args: any[]) => {
     setVisible(false);
     switch (cmd) {
@@ -17,10 +36,29 @@ function App() {
       case "hiddenCountDown":
         setCountDownVisible(false);
         break;
+      case "showSetting":
+        setSettingVisible(true);
+        break;
       default:
         break;
     }
   };
+  const handleKeydown = (event: KeyboardEvent, h: HotkeysEvent) => {
+    const key = h.key;
+    if (keybindings.current[key]) {
+      console.log("startDebug");
+      handleCommand(keybindings.current[key], event);
+    }
+    // 禁止冒泡
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  useKeybinding(keybindingStr, handleKeydown, {
+    scope: "global"
+  });
+  useEffect(() => {
+    initData();
+  }, []);
   return (
     <>
       <div
@@ -49,7 +87,19 @@ function App() {
         />
       )}
       {countDownVisible && (
-        <CountDown initial={5} onDestroy={() => setCountDownVisible(false)} />
+        <CountDown
+          initial={countDownInitial}
+          onDestroy={() => setCountDownVisible(false)}
+        />
+      )}
+      {settingVisible && (
+        <SettingModal
+          onOk={() => {
+            setSettingVisible(false);
+            initData();
+          }}
+          onCancel={() => setSettingVisible(false)}
+        />
       )}
     </>
   );

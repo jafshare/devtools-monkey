@@ -10,7 +10,7 @@ export default defineConfig({
       entry: "src/main.tsx",
       userscript: {
         author: "Hunter Jiang",
-        icon: "https://vitejs.dev/logo.svg",
+        icon: "https://raw.githubusercontent.com/jafshare/devtools-monkey/main/icon/logo.svg",
         namespace: "npm/vite-plugin-monkey",
         match: ["*://*/*"]
       },
@@ -20,7 +20,8 @@ export default defineConfig({
           "react-dom": cdn.jsdelivr(
             "ReactDOM",
             "umd/react-dom.production.min.js"
-          )
+          ),
+          "hotkeys-js": cdn.jsdelivr("hotkeys", "dist/hotkeys.min.js")
         }
       }
     })

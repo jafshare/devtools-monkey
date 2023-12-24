@@ -10,9 +10,18 @@ function CountDown({
   initial = 5,
   onDestroy
 }: React.PropsWithChildren<CountDownProps>) {
+  // 是否立刻执行
+  const immediately = initial <= 0;
   const [count, setCount] = useState(initial);
   const timer = useRef<any>();
   useEffect(() => {
+    if (immediately) {
+      onDestroy?.();
+      // 立刻执行
+      /* eslint-disable */
+      debugger;
+      return;
+    }
     timer.current = setInterval(() => {
       setCount((val) => {
         const newVal = val - 1;
@@ -33,9 +42,11 @@ function CountDown({
     };
   }, []);
   return (
-    <div className={styles.countDownMask}>
-      <div className={styles.countDown}>{count}</div>
-    </div>
+    !immediately && (
+      <div className={styles.countDownMask}>
+        <div className={styles.countDown}>{count}</div>
+      </div>
+    )
   );
 }
 
