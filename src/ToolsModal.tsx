@@ -8,16 +8,32 @@ export interface ToolsModalProps {
   onCommand: (cmd: string) => void;
   className?: string;
   ignores: any[];
+  reactScanEnabled: boolean;
 }
-function ToolsModal({ onCommand, onClose, ignores, ...rest }: ToolsModalProps) {
+
+function ToolsModal({
+  onCommand,
+  onClose,
+  ignores,
+  reactScanEnabled,
+  ...rest
+}: ToolsModalProps) {
   const modalRef = useRef<HTMLElement>();
+
   const startDebug = () => {
     onCommand?.("showCountDown");
   };
+
   const showSetting = () => {
     onCommand?.("showSetting");
   };
+
+  const toggleReactScan = () => {
+    onCommand?.("toggleReactScan");
+  };
+
   useClickOutside(modalRef, onClose, { ignores });
+
   return (
     <>
       <div {...rest} ref={modalRef as any}>
@@ -35,6 +51,29 @@ function ToolsModal({ onCommand, onClose, ignores, ...rest }: ToolsModalProps) {
             <path
               fill="currentColor"
               d="m10.94 13.5l-1.32 1.32a3.73 3.73 0 0 0-7.24 0L1.06 13.5L0 14.56l1.72 1.72l-.22.22V18H0v1.5h1.5v.08c.077.489.214.966.41 1.42L0 22.94L1.06 24l1.65-1.65A4.308 4.308 0 0 0 6 24a4.31 4.31 0 0 0 3.29-1.65L10.94 24L12 22.94L10.09 21c.198-.464.336-.951.41-1.45v-.1H12V18h-1.5v-1.5l-.22-.22L12 14.56l-1.06-1.06zM6 13.5a2.25 2.25 0 0 1 2.25 2.25h-4.5A2.25 2.25 0 0 1 6 13.5zm3 6a3.33 3.33 0 0 1-3 3a3.33 3.33 0 0 1-3-3v-2.25h6v2.25zm14.76-9.9v1.26L13.5 17.37V15.6l8.5-5.37L9 2v9.46a5.07 5.07 0 0 0-1.5-.72V.63L8.64 0l15.12 9.6z"
+            />
+          </svg>
+        </button>
+        <button
+          className={`${styles.itemBtn} ${
+            reactScanEnabled ? styles.active : ""
+          }`}
+          onClick={toggleReactScan}
+          title={`${reactScanEnabled ? "关闭" : "开启"} React 性能分析`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            style={{
+              color: reactScanEnabled ? "#61dafb" : "currentColor",
+              transition: "color 0.3s ease"
+            }}
+          >
+            <path
+              fill="currentColor"
+              d="M12 16c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2m0-13c4.58 0 8.5 2.85 9.74 6.81c.15.47-.18.97-.68.97c-.34 0-.65-.23-.75-.56C19.23 6.78 15.94 4.5 12 4.5S4.77 6.78 3.69 10.22c-.1.33-.41.56-.75.56c-.5 0-.83-.5-.68-.97C3.5 5.85 7.42 3 12 3m0 3c2.75 0 5 2.25 5 5s-2.25 5-5 5s-5-2.25-5-5s2.25-5 5-5m0 2c-1.65 0-3 1.35-3 3s1.35 3 3 3s3-1.35 3-3s-1.35-3-3-3m6.71 11.28l-1.42 1.43l-2.12-2.12c-.86.55-1.87.91-2.96.99L12 21l-.21-.42c-1.09-.08-2.1-.44-2.96-.99l-2.12 2.12l-1.42-1.43l2.12-2.12c-.55-.86-.91-1.87-.99-2.96L6 15l.42-.21c.08-1.09.44-2.1.99-2.96L5.29 9.71l1.42-1.43l2.12 2.12c.86-.55 1.87-.91 2.96-.99L12 9l.21.42c1.09.08 2.1.44 2.96.99l2.12-2.12l1.42 1.43l-2.12 2.12c.55.86.91 1.87.99 2.96L18 15l-.42.21c-.08 1.09-.44 2.1-.99 2.96l2.12 2.12z"
             />
           </svg>
         </button>
@@ -59,4 +98,5 @@ function ToolsModal({ onCommand, onClose, ignores, ...rest }: ToolsModalProps) {
     </>
   );
 }
+
 export default ToolsModal;

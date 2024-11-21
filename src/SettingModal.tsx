@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import styles from "./SettingModal.module.less";
-import { useKeybinding } from "./hooks";
 
 import { GM_getValue, GM_setValue } from "$";
 
@@ -10,40 +9,89 @@ interface Props {
   onCancel?: () => void;
 }
 const SettingModal: React.FC<Props> = ({ onCancel, onOk }) => {
-  const targetRef = useRef<HTMLElement>();
-  const keyMap = useRef<Record<string, any>>({});
   const [debugHotkey, setDebugHotkey] = useState("");
+  const [reactScanHotkey, setReactScanHotkey] = useState("");
   const [defaultCountDown, setDefaultCountDown] = useState(5);
-  useKeybinding(
-    "*",
-    (e, h) => {
-      // 保存码值
-      keyMap.current[e.keyCode] = e.key.toLowerCase();
-      setDebugHotkey(
-        h.keys
-          .map((k) => {
-            const _key = keyMap.current[k];
-            return _key === "control" ? "ctrl" : _key.replace("arrow", "");
-          })
-          .join("+")
-      );
-      e.preventDefault();
-      e.stopPropagation();
-    },
-    { target: targetRef as any, scope: "keybinding" }
+  const [activeInput, setActiveInput] = useState<"debug" | "reactScan" | null>(
+    null
   );
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!activeInput) {
+        return;
+      }
+
+      // 处理删除键
+      if (event.key === "Backspace" || event.key === "Delete") {
+        if (activeInput === "debug") {
+          setDebugHotkey("");
+        } else {
+          setReactScanHotkey("");
+        }
+        return;
+      }
+
+      // 忽略单独的修饰键
+      if (["Control", "Alt", "Shift", "Meta"].includes(event.key)) {
+        return;
+      }
+
+      const modifiers: string[] = [];
+      if (event.ctrlKey) modifiers.push("ctrl");
+      if (event.altKey) modifiers.push("alt");
+      if (event.shiftKey) modifiers.push("shift");
+      if (event.metaKey) modifiers.push("cmd");
+
+      const key = event.key.length === 1 ? event.key : event.key.toLowerCase();
+      const hotkeyStr = [...modifiers, key].join("+");
+
+      if (activeInput === "debug") {
+        setDebugHotkey(hotkeyStr);
+      } else {
+        setReactScanHotkey(hotkeyStr);
+      }
+    },
+    [activeInput]
+  );
+
+  // 使用原生事件监听而不是 useKeybinding
+  useEffect(() => {
+    if (activeInput) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [activeInput, handleKeyDown]);
+
   const handleSave = () => {
     GM_setValue("devtools.settings", {
       debugHotkey,
+      reactScanHotkey,
       defaultCountDown
     });
     onOk?.();
   };
+
+  const clearHotkey = (type: "debug" | "reactScan") => {
+    if (type === "debug") {
+      setDebugHotkey("");
+    } else {
+      setReactScanHotkey("");
+    }
+  };
+
   useEffect(() => {
     const settings = GM_getValue("devtools.settings") || {};
     setDebugHotkey((settings as any)?.debugHotkey || "");
+    setReactScanHotkey((settings as any)?.reactScanHotkey || "");
     setDefaultCountDown((settings as any)?.defaultCountDown ?? 5);
   }, []);
+
   return (
     <>
       <div className={styles.card}>
@@ -51,35 +99,80 @@ const SettingModal: React.FC<Props> = ({ onCancel, onOk }) => {
           ×
         </button>
         <div className={styles.header}>
+          <div className={styles.title}>设置</div>
           <div className={styles.content}>
             <div className={styles.coolinput}>
-              <label htmlFor="input" className="text">
+              <label htmlFor="debug-hotkey" className="text">
                 Debug快捷键:
               </label>
-              <input
-                ref={targetRef as any}
-                value={debugHotkey}
-                type="text"
-                placeholder="请按下快捷键"
-                name="input"
-                className="input"
-                readOnly
-              />
+              <div className={styles.inputWrapper}>
+                <input
+                  id="debug-hotkey"
+                  value={debugHotkey}
+                  type="text"
+                  placeholder="点击输入框并按下快捷键"
+                  className="input"
+                  readOnly
+                  onFocus={() => setActiveInput("debug")}
+                  onBlur={() => setActiveInput(null)}
+                />
+                {debugHotkey && (
+                  <button
+                    className={styles.clearBtn}
+                    onClick={() => clearHotkey("debug")}
+                    type="button"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              <div className={styles.hint}>
+                按 Backspace 或点击 × 清除快捷键
+              </div>
+            </div>
+            <div className={styles.coolinput}>
+              <label htmlFor="reactscan-hotkey" className="text">
+                React Scan快捷键:
+              </label>
+              <div className={styles.inputWrapper}>
+                <input
+                  id="reactscan-hotkey"
+                  value={reactScanHotkey}
+                  type="text"
+                  placeholder="点击输入框并按下快捷键"
+                  className="input"
+                  readOnly
+                  onFocus={() => setActiveInput("reactScan")}
+                  onBlur={() => setActiveInput(null)}
+                />
+                {reactScanHotkey && (
+                  <button
+                    className={styles.clearBtn}
+                    onClick={() => clearHotkey("reactScan")}
+                    type="button"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              <div className={styles.hint}>
+                按 Backspace 或点击 × 清除快捷键
+              </div>
             </div>
             <div
               className={styles.coolinput}
               onKeyDown={(e) => e.stopPropagation()}
             >
-              <label htmlFor="input" className="text">
+              <label htmlFor="countdown" className="text">
                 CountDown默认值:
               </label>
               <input
+                id="countdown"
                 value={defaultCountDown}
                 onChange={(e) => setDefaultCountDown(e.target.valueAsNumber)}
                 min={0}
                 type="number"
                 placeholder="请设置CountDown"
-                name="input"
                 className="input"
               />
             </div>

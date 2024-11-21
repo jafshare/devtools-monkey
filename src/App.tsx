@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./App.module.less";
 import SettingModal from "./SettingModal";
@@ -6,59 +6,98 @@ import ToolsModal from "./ToolsModal";
 import CountDown from "./components/CountDown";
 import { useKeybinding } from "./hooks";
 
-import type { HotkeysEvent } from "hotkeys-js";
-
-import { GM_getValue } from "$";
+import { GM_getValue, GM_setValue } from "$";
 
 function App() {
   const [visible, setVisible] = useState(false);
   const [countDownVisible, setCountDownVisible] = useState(false);
   const [settingVisible, setSettingVisible] = useState(false);
-  const keybindings = useRef<Record<string, string>>({});
-  const [keybindingStr, setKeybindingStr] = useState("");
+  const [reactScanEnabled, setReactScanEnabled] = useState(false);
+  const [keyBindings, setKeyBindings] = useState<Record<string, () => void>>(
+    {}
+  );
   const [countDownInitial, setCountDownInitial] = useState(5);
   const floatingRef = useRef<HTMLElement>();
-  const initData = () => {
+
+  const toggleReactScan = useCallback(() => {
+    setReactScanEnabled((prevState) => {
+      const newState = !prevState;
+      if (newState) {
+        const script = document.createElement("script");
+        script.src = "https://unpkg.com/react-scan/dist/auto.global.js";
+        document.body.appendChild(script);
+      } else {
+        const script = document.querySelector('script[src*="react-scan"]');
+        if (script) {
+          script.remove();
+        }
+      }
+      GM_setValue("reactscan.enabled", newState);
+      return newState;
+    });
+  }, []);
+
+  const handleCommand = useCallback(
+    (cmd: string) => {
+      setVisible(false);
+      switch (cmd) {
+        case "showCountDown":
+          setCountDownVisible(true);
+          break;
+        case "hiddenCountDown":
+          setCountDownVisible(false);
+          break;
+        case "showSetting":
+          setSettingVisible(true);
+          break;
+        case "toggleReactScan":
+          toggleReactScan();
+          break;
+        default:
+          break;
+      }
+    },
+    [toggleReactScan]
+  );
+
+  const initData = useCallback(() => {
     const settings = GM_getValue("devtools.settings") || {};
-    const debugHotKey = (settings as any)?.debugHotkey || "";
     setCountDownInitial((settings as any)?.defaultCountDown ?? 5);
-    keybindings.current = {
-      [debugHotKey]: "showCountDown"
-    };
-    setKeybindingStr(debugHotKey);
-  };
-  const handleCommand = (cmd: string, ...args: any[]) => {
-    setVisible(false);
-    switch (cmd) {
-      case "showCountDown":
-        setCountDownVisible(true);
-        break;
-      case "hiddenCountDown":
-        setCountDownVisible(false);
-        break;
-      case "showSetting":
-        setSettingVisible(true);
-        break;
-      default:
-        break;
+
+    const bindings: Record<string, () => void> = {};
+
+    const debugHotKey = (settings as any)?.debugHotkey;
+    if (debugHotKey) {
+      bindings[debugHotKey] = () => handleCommand("showCountDown");
     }
-  };
-  const handleKeydown = (event: KeyboardEvent, h: HotkeysEvent) => {
-    const key = h.key;
-    if (keybindings.current[key]) {
-      console.log("startDebug");
-      handleCommand(keybindings.current[key], event);
+
+    const reactScanHotkey = (settings as any)?.reactScanHotkey;
+    if (reactScanHotkey) {
+      bindings[reactScanHotkey] = () => handleCommand("toggleReactScan");
     }
-    // 禁止冒泡
-    event.preventDefault();
-    event.stopPropagation();
-  };
-  useKeybinding(keybindingStr, handleKeydown, {
-    scope: "global"
+
+    setKeyBindings(bindings);
+  }, []);
+
+  useKeybinding(keyBindings, undefined, {
+    enabled: !settingVisible
   });
+
   useEffect(() => {
     initData();
+    setReactScanEnabled(GM_getValue("reactscan.enabled", false));
+  }, [initData]);
+
+  useEffect(() => {
+    return () => {
+      const script = document.querySelector('script[src*="react-scan"]');
+      if (script) {
+        script.remove();
+      }
+      GM_setValue("reactscan.enabled", false);
+    };
   }, []);
+
   return (
     <>
       <div
@@ -84,6 +123,7 @@ function App() {
           className={styles.devtoolsModal}
           onCommand={handleCommand}
           ignores={[floatingRef.current]}
+          reactScanEnabled={reactScanEnabled}
         />
       )}
       {countDownVisible && (

@@ -6,90 +6,160 @@
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: left;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   width: 500px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
   background-color: #fff;
+  border: 1px solid #eee;
+  animation: slideIn 0.2s ease-out;
 }
 
 .dismiss {
   cursor: pointer;
   position: absolute;
-  right: 10px;
-  top: 10px;
+  right: 16px;
+  top: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1rem;
-  background-color: #fff;
-  color: black;
-  border: 2px solid #d1d5db;
-  font-size: 1rem;
-  font-weight: 300;
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  transition: 0.3s ease;
-}
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: transparent;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  transition: all 0.2s ease;
 
-.dismiss:hover {
-  background-color: #ee0d0d;
-  border: 2px solid #ee0d0d;
-  color: #fff;
+  &:hover {
+    background-color: #f5f5f5;
+    color: #333;
+  }
 }
 
 .header {
-  padding: 1.25rem 1rem 1rem 1rem;
+  padding: 24px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
 }
 
 .content {
   margin-top: 0.75rem;
-  text-align: center;
-  padding: 20px;
+  text-align: left;
   display: flex;
-  gap: 10px;
+  gap: 20px;
   flex-direction: column;
 }
+
 .actions {
   display: flex;
   justify-content: flex-end;
-  padding-right: 20px;
+  margin-top: 24px;
+  padding-top: 16px;
 }
+
 .button {
   cursor: pointer;
-  background-color: #fff;
-  color: black;
-  border: 2px solid #d1d5db;
-  border-radius: 8px;
-  padding: 8px 25px;
-  font-size: 1rem;
-  font-weight: 300;
+  background-color: #1677ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  
   &:hover {
-    border: 2px #818cf8 solid;
-    color: #818cf8;
+    background-color: #4096ff;
   }
 }
 
 .coolinput {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
+
   :global {
-    label {
-      margin-right: 10px;
-    }
-    input.input {
-      padding: 11px 10px;
-      font-size: 0.75rem;
-      border-radius: 5px;
-      border: 2px #aaa solid;
-      flex: 1;
+    label.text {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
     }
 
-    input.input:focus {
-      border: 2px #818cf8 solid;
-      outline: none;
+    input.input {
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #d9d9d9;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        border-color: #4096ff;
+      }
+
+      &:focus {
+        border-color: #1677ff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+      }
+
+      &::placeholder {
+        color: #bfbfbf;
+      }
     }
+  }
+}
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
+  
+  input {
+    width: 100%;
+    padding-right: 36px;
+  }
+}
+
+.clearBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #bfbfbf;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #666;
+    background-color: #f5f5f5;
+  }
+}
+
+.hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
   }
 }
