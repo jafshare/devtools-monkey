@@ -20,8 +20,7 @@ export default defineConfig({
           "react-dom": cdn.jsdelivr(
             "ReactDOM",
             "umd/react-dom.production.min.js"
-          ),
-          "hotkeys-js": cdn.jsdelivr("hotkeys", "dist/hotkeys.min.js")
+          )
         }
       }
     })
