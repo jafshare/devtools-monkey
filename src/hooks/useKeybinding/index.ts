@@ -57,8 +57,6 @@ export function useKeybinding(
       {}
     );
 
-    console.log("Registered hotkeys:", formattedBindings); // 调试用
-
     const unsubscribe = tinykeys(target, formattedBindings);
 
     return () => {

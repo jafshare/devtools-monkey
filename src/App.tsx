@@ -4,6 +4,7 @@ import styles from "./App.module.less";
 import SettingModal from "./SettingModal";
 import ToolsModal from "./ToolsModal";
 import CountDown from "./components/CountDown";
+import { MemoryMonitor } from "./components/MemoryMonitor";
 import { useKeybinding } from "./hooks";
 
 import { GM_getValue, GM_setValue } from "$";
@@ -18,6 +19,11 @@ function App() {
   );
   const [countDownInitial, setCountDownInitial] = useState(5);
   const floatingRef = useRef<HTMLElement>();
+  const [memorySettings, setMemorySettings] = useState({
+    enabled: true,
+    threshold: 500,
+    mode: "always" as const
+  });
 
   const toggleReactScan = useCallback(() => {
     setReactScanEnabled((prevState) => {
@@ -98,6 +104,17 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const settings = GM_getValue("devtools.settings") || {};
+    setMemorySettings(
+      (settings as any)?.memoryMonitor ?? {
+        enabled: true,
+        threshold: 500,
+        mode: "always"
+      }
+    );
+  }, []);
+
   return (
     <>
       <div
@@ -141,6 +158,11 @@ function App() {
           onCancel={() => setSettingVisible(false)}
         />
       )}
+      <MemoryMonitor
+        threshold={memorySettings.threshold}
+        mode={memorySettings.mode}
+        enabled={memorySettings.enabled}
+      />
     </>
   );
 }
